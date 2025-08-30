@@ -1,21 +1,12 @@
 local M = {}
 
 local function call_command(json, template, package_name, out_dir)
-    -- Create a temp file to ensures the data is always a file since the
-    -- script accepts a file instead of plain text
-    -- local tmpfile = vim.fn.tempname()
-    -- local f = io.open(tmpfile, 'w')
-    -- if f == nil then return end
-
-    -- f:write(json)
-    -- f:close()
-
     local plugin_dir = debug.getinfo(1).source
     plugin_dir = string.sub(plugin_dir, 1)
     plugin_dir = string.match(plugin_dir, "@(.+)/%a+.%a+")
 
     local cmd = {
-        plugin_dir .. '/venv/bin/python',
+        python,
         plugin_dir .. '/' .. 'tono.py',
         vim.fn.fnameescape(json),
         vim.fn.fnameescape(package_name),
