@@ -72,6 +72,7 @@ local function select_template(json)
     local actions = require("telescope.actions")
     local action_state = require("telescope.actions.state")
     local config_values = require("telescope.config").values
+    local previewers = require("telescope.previewers")
 
     local template_dir = debug.getinfo(1).source
     template_dir = string.sub(template_dir, 1)
@@ -81,8 +82,9 @@ local function select_template(json)
     pickers.new({}, {
         prompt_title = "Select Template to Use",
         finder = finders.new_oneshot_job(
-            { "sh", "-c", string.format("find %s -type f -name '*.j2' | awk -F/ '{print $NF}'", template_dir) }, {}),
+            { "sh", "-c", string.format("find %s -type f -name '*.j2'", template_dir) }, {}),
         sorter = config_values.generic_sorter({}),
+        previewer = previewers.vim_buffer_cat.new({}),
         attach_mappings = function(prompt_bufnr, _)
             actions.select_default:replace(function()
                 local selection = action_state.get_selected_entry()[1]
@@ -104,11 +106,13 @@ local function select_json_file()
     local actions = require("telescope.actions")
     local action_state = require("telescope.actions.state")
     local config_values = require("telescope.config").values
+    local previewers = require("telescope.previewers")
 
     pickers.new({}, {
         prompt_title = "Select JSON to Convert",
         finder = finders.new_oneshot_job({ "find", ".", "-type", "f", "-name", "*.json" }, {}),
         sorter = config_values.generic_sorter({}),
+        previewer = previewers.vim_buffer_cat.new({}),
         attach_mappings = function(prompt_bufnr, _)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
@@ -117,14 +121,6 @@ local function select_json_file()
                 if not selection then return end
 
                 select_template(selection)
-
-                -- local file = io.open(selection, 'r')
-                -- if not file then
-                --     return true
-                -- end
-
-                -- local content = file:read("*a")
-                -- file:close()
             end)
 
             return true
