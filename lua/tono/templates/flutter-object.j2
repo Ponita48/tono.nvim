@@ -1,0 +1,29 @@
+import 'package:json_annotation/json_annotation.dart';
+{% for item in clazz.dependencies -%}
+import 'package:{{ clazz.libraryName }}/{{ clazz.saveTo }}/{{ item }}_response.dart';
+{% endfor -%}
+import 'package:paragon_flutter_library/data/model/response_model.dart';
+
+part '{{ clazz.filename }}_response.g.dart';
+
+{% if clazz.dependencies -%}
+@JsonSerializable(explicitToJson: true)
+{% else -%}
+@JsonSerializable()
+{% endif -%}
+class {{ clazz.name }} extends ResponseModel {
+  {{ clazz.name }}({
+  {%- for item in clazz.attrs %}
+    this.{{ item.name }},
+  {%- endfor %}
+  });
+{% for item in clazz.attrs %}
+  @JsonKey(name: '{{ item.jsonName }}')
+  final {{ item.type }}? {{ item.name }};
+{%- endfor %}
+
+  factory {{ clazz.name }}.fromJson(Map<String, dynamic> json) => _${{ clazz.fromJson }}(json);
+
+  @override
+  Map<String, dynamic> toJson() => _${{ clazz.toJson }}(this);
+}
