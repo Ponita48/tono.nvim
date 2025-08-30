@@ -6,7 +6,7 @@ local function call_command(json, template, package_name, out_dir)
     plugin_dir = string.match(plugin_dir, "@(.+)/%a+.%a+")
 
     local cmd = {
-        python,
+        "python",
         plugin_dir .. '/' .. 'tono.py',
         vim.fn.fnameescape(json),
         vim.fn.fnameescape(package_name),
