@@ -1,4 +1,5 @@
 import json
+import argparse
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pathlib import Path
 
@@ -149,7 +150,27 @@ class JsonToNativeObject:
 
 
 if __name__ == "__main__":
-    test = JsonToNativeObject(
-        'test.json', 'flutter-object.jinja', 'nova_ba', 'data/coba/model')
+    parser = argparse.ArgumentParser(
+        description="Generate Flutter test file from a JSON."
+    )
+    parser.add_argument("jsonName", help="Name of the JSON file to use")
+    parser.add_argument("--template", default="flutter-test.jinja",
+                        help="Jinja template file \
+                        (default: flutter-test.jinja)")
+    parser.add_argument("packageName", help="Name of your Dart package")
+    parser.add_argument("--saveTo", default=".",
+                        help="Directory to save the output \
+                        (default: current directory)")
 
-    test.render()
+    args = parser.parse_args()
+
+    # Ensure save path exists
+    jsonToNativeObject = JsonToNativeObject(
+        args.jsonName,
+        args.template,
+        args.packageName,
+        args.saveTo,
+    )
+    jsonToNativeObject.render()
+
+    outputName = f"{args.saveTo}/{args.jsonName.split('.')[0]}.dart"
