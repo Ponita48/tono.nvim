@@ -91,7 +91,8 @@ local function select_template(json)
                 if not selection then return end
                 actions.close(prompt_bufnr)
 
-                select_destination_dir(json, selection)
+                local file = vim.fn.fnamemodify(selection, ":t")
+                select_destination_dir(json, file)
             end)
 
             return true
