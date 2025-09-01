@@ -6,12 +6,15 @@ This plugin uses [Jinja2](https://jinja.palletsprojects.com/en/stable/) as a tem
 
 ## Installation
 
+Before installing this plugin, make sure you have `python3` and `Jinja2` installed.
+
 In order to use this plugin, put this into your package manager.
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 {
   "Ponita48/tono.nvim",
+  dependencies = { "nvim-telescope/telescope.nvim" },
   config = function()
     require("tono.generator").setup()
   end
@@ -24,6 +27,31 @@ To use this plugin, use the command below inside your neovim.
 
 ```lua
 :TonoFiles
+```
+
+### Custom Directory
+
+This plugin also support custom directory, which means you can adjust your template based on your own requirement.
+
+To add a custom directory, use this setup on your plugin setup
+
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+```lua
+{
+  "Ponita48/tono.nvim",
+  dependencies = { "nvim-telescope/telescope.nvim" },
+  config = true,
+  opts = {
+    additional_dir = "/my/custom/directory",
+  }
+}
+```
+
+When using a custom directory, you will see something like this to differentiate the files (in case you have a same file name)
+
+```
+<additional_dir>/your-template.j2
+<default>/default-template.j2
 ```
 
 ## Contributing
