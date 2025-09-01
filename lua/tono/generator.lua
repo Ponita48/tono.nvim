@@ -66,7 +66,7 @@ local function select_destination_dir(json, template)
     }):find()
 end
 
-local function select_template(json)
+local function select_template(opts, json)
     local pickers = require("telescope.pickers")
     local finders = require("telescope.finders")
     local actions = require("telescope.actions")
@@ -81,17 +81,38 @@ local function select_template(json)
 
     pickers.new({}, {
         prompt_title = "Select Template to Use",
-        finder = finders.new_oneshot_job(
-            { "sh", "-c", string.format("find %s -type f -name '*.j2'", template_dir) }, {}),
+        finder = finders.new_oneshot_job({ "sh", "-c", string.format(
+            "find %s %s -type f -name '*.j2'",
+            template_dir,
+            opts.additional_dir or vim.fn.getcwd() .. '/templates'
+        )}, {
+            entry_maker = function(entry)
+                local head = vim.fn.fnamemodify(entry, ":h")
+                local display = vim.fn.fnamemodify(entry, ":t")
+                local home = os.getenv("HOME") or "$HOME"
+
+                if head ~= template_dir then
+                    display = head:gsub(home, "~") .. '/' .. display
+                else
+                    display = '<default>/' .. display
+                end
+
+                return {
+                    value = entry,
+                    display = display,
+                    ordinal = entry,
+                }
+            end,
+        }),
         sorter = config_values.generic_sorter({}),
         previewer = previewers.vim_buffer_cat.new({}),
         attach_mappings = function(prompt_bufnr, _)
             actions.select_default:replace(function()
-                local selection = action_state.get_selected_entry()[1]
+                local selection = action_state.get_selected_entry()
                 if not selection then return end
                 actions.close(prompt_bufnr)
 
-                local file = vim.fn.fnamemodify(selection, ":t")
+                local file = vim.fn.fnamemodify(selection.value, ":t")
                 select_destination_dir(json, file)
             end)
 
@@ -100,8 +121,7 @@ local function select_template(json)
     }):find()
 end
 
---@diagnostic disable-next-line
-local function select_json_file()
+local function select_json_file(opts)
     local pickers = require("telescope.pickers")
     local finders = require("telescope.finders")
     local actions = require("telescope.actions")
@@ -111,7 +131,11 @@ local function select_json_file()
 
     pickers.new({}, {
         prompt_title = "Select JSON to Convert",
-        finder = finders.new_oneshot_job({ "find", ".", "-type", "f", "-name", "*.json" }, {}),
+        finder = finders.new_oneshot_job({
+            "find", ".",
+            "-type", "f",
+            "-name", "*.json"
+        }, {}),
         sorter = config_values.generic_sorter({}),
         previewer = previewers.vim_buffer_cat.new({}),
         attach_mappings = function(prompt_bufnr, _)
@@ -121,7 +145,7 @@ local function select_json_file()
                 local selection = action_state.get_selected_entry()[1]
                 if not selection then return end
 
-                select_template(selection)
+                select_template(opts, selection)
             end)
 
             return true
@@ -141,8 +165,8 @@ local function select_current_buffer()
     select_destination_dir(content)
 end
 
-function M.generate_from_files()
-    select_json_file()
+function M.generate_from_files(opts)
+    select_json_file(opts)
 end
 
 function M.generate_from_buffer()
